@@ -45,6 +45,28 @@ export interface Workspace {
   env: EnvVar[];
   /** Variables / secrets the CI simulator exposes to pipelines (GitLab variables, GitHub vars+secrets, Jenkins credentials). */
   ciVars?: EnvVar[];
+  /** Tools this workspace needs installed (label + a command that exits 0 when present). */
+  prerequisites?: Prerequisite[];
+}
+
+export interface Prerequisite {
+  label: string;
+  command: string;
+  /** Optional text the output must contain (case-insensitive), e.g. "v24" to pin a version. */
+  expected?: string;
+}
+
+export interface PrerequisiteResult {
+  label: string;
+  command: string;
+  expected?: string;
+  ok: boolean;
+  /** Exit code, or null when the command could not run / timed out. */
+  code?: number | null;
+  /** Combined output (trimmed, capped). */
+  output: string;
+  error?: string | null;
+  durationMs: number;
 }
 
 export interface Settings {

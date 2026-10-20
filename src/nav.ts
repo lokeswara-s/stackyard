@@ -19,6 +19,7 @@ export const PRIMARY_NAV: NavItem[] = [
 export const TOOLS_NAV: NavItem[] = [
   { to: "/pipelines", icon: "conversion_path", label: "CI Pipelines" },
   { to: "/environment", icon: "vpn_key", label: "Environment" },
+  { to: "/prerequisites", icon: "checklist", label: "Prerequisites" },
   { to: "/plugins", icon: "extension", label: "Plugins" },
   { to: "/fault-injection", icon: "bolt", label: "Fault Injection" },
 ];

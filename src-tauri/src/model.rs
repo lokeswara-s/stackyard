@@ -72,6 +72,21 @@ pub struct Workspace {
     /// Variables and secrets for the CI simulator (GitLab CI/CD variables, GitHub secrets, Jenkins credentials).
     #[serde(default)]
     pub ci_vars: Vec<EnvVar>,
+    /// Tools the workspace needs on this machine (`Java 8` = `java -version`), checked on demand.
+    #[serde(default)]
+    pub prerequisites: Vec<Prerequisite>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Prerequisite {
+    #[serde(default)]
+    pub label: String,
+    #[serde(default)]
+    pub command: String,
+    /// Optional text the output must contain (case-insensitive), e.g. `v24` or `1.8.0`, to check the version.
+    #[serde(default)]
+    pub expected: String,
 }
 
 fn default_profile() -> String {

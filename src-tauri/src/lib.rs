@@ -6,6 +6,7 @@ mod git;
 mod model;
 mod portargs;
 mod ports;
+mod prereq;
 mod procs;
 mod shell;
 mod storage;
@@ -80,6 +81,18 @@ async fn preview_command(repo_path: String, command: String, port: Option<u16>) 
 }
 
 // ---------- git ----------
+
+/// Check one prerequisite (the UI calls this per row so each status appears as soon as it is known).
+#[tauri::command]
+async fn check_prerequisite(item: model::Prerequisite) -> CmdResult<prereq::CheckResult> {
+    blocking(move || prereq::check_one(&item)).await
+}
+
+/// Check all prerequisites, one by one.
+#[tauri::command]
+async fn check_prerequisites(items: Vec<model::Prerequisite>) -> CmdResult<Vec<prereq::CheckResult>> {
+    blocking(move || prereq::check_all(&items)).await
+}
 
 /// What Stackyard keeps on disk and in Docker (sizes can take a few seconds).
 #[tauri::command]
@@ -486,6 +499,8 @@ pub fn run() {
             git_fetch,
             git_pull_safe,
             shell_options,
+            check_prerequisite,
+            check_prerequisites,
             storage_report,
             storage_clean,
             git_stash,

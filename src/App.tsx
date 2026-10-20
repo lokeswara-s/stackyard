@@ -7,6 +7,7 @@ import DashboardPage from "./pages/DashboardPage";
 const ContainersPage = lazy(() => import("./pages/ContainersPage"));
 const DependencyGraphPage = lazy(() => import("./pages/DependencyGraphPage"));
 const EnvPortsPage = lazy(() => import("./pages/EnvPortsPage"));
+const PrerequisitesPage = lazy(() => import("./pages/PrerequisitesPage"));
 const FaultInjectionPage = lazy(() => import("./pages/FaultInjectionPage"));
 const GitMultiRepoPage = lazy(() => import("./pages/GitMultiRepoPage"));
 const LogsPage = lazy(() => import("./pages/LogsPage"));
@@ -35,6 +36,7 @@ export default function App() {
         <Route path="git" element={<GitMultiRepoPage />} />
         <Route path="logs" element={<LogsPage />} />
         <Route path="environment" element={<EnvPortsPage />} />
+        <Route path="prerequisites" element={<PrerequisitesPage />} />
         <Route path="pipelines" element={<PipelinesPage />} />
         <Route path="plugins" element={<PluginMarketplacePage />} />
         <Route path="fault-injection" element={<FaultInjectionPage />} />

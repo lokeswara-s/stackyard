@@ -856,3 +856,40 @@ fn storage_report_cleans_caches_and_runs_and_prunes_old_cache_entries() {
     assert!(crate::storage::clean(&ci, &["nope".into()]).is_err());
     let _ = fs::remove_dir_all(root);
 }
+
+#[test]
+fn prerequisites_report_pass_fail_missing_and_stderr_only_tools() {
+    use crate::model::Prerequisite;
+    let p = |l: &str, c: &str| Prerequisite { label: l.into(), command: c.into(), expected: String::new() };
+    // `node -v` is a real tool on this machine (the app's own toolchain); stderr-only output must still pass.
+    let stderr_ok = if cfg!(windows) { "echo only-on-stderr 1>&2" } else { "echo only-on-stderr 1>&2" };
+    let fail = if cfg!(windows) { "exit 7" } else { "exit 7" };
+    let items = vec![
+        p("Node", "node -v"),
+        p("Stderr tool", stderr_ok),
+        p("Fails", fail),
+        p("Missing tool", "definitely-not-a-real-tool-xyz --version"),
+        p("Empty", "   "),
+    ];
+    let r = crate::prereq::check_all(&items);
+    assert_eq!(r.len(), 5, "results keep the order of the list");
+    assert!(r[0].ok && r[0].code == Some(0) && r[0].output.starts_with('v'), "{:?}", r[0]);
+    assert!(r[1].ok && r[1].output.contains("only-on-stderr"), "{:?}", r[1]);
+    assert!(!r[2].ok && r[2].code == Some(7), "{:?}", r[2]);
+    assert!(!r[3].ok && r[3].error.is_some(), "{:?}", r[3]);
+    assert!(!r[4].ok && r[4].error.as_deref() == Some("No command to run"), "{:?}", r[4]);
+    assert_eq!(r[0].label, "Node");
+
+    // Version matching: output must contain the expected text (case-insensitive); exit code 0 alone is not enough.
+    let with = |c: &str, e: &str| Prerequisite { label: "v".into(), command: c.into(), expected: e.into() };
+    let r = crate::prereq::check_all(&[
+        with("echo Version 1.8.0_292", "1.8"),
+        with("echo Version 1.8.0_292", "VERSION 1.8"),
+        with("echo Version 11.0.2", "1.8"),
+        with("exit 3", "anything"),
+    ]);
+    assert!(r[0].ok, "{:?}", r[0]);
+    assert!(r[1].ok, "{:?}", r[1]);
+    assert!(!r[2].ok && r[2].code == Some(0) && r[2].error.as_deref().unwrap().contains("1.8"), "{:?}", r[2]);
+    assert!(!r[3].ok && r[3].code == Some(3), "{:?}", r[3]);
+}
